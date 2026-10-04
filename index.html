@@ -4,6 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Lucerne Grand by CDL at Lakeside: live price list, available units, floor plans, value picks and affordability calculator. By Ken Tan, Huttons Asia (CEA R007903D).">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGTYDENS24"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGTYDENS24', { project_name: 'lucerne_grand' });
+</script>
+<!-- End Google tag -->
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '525622514314902');
+fbq('track', 'PageView');
+</script>
+<!-- End Meta Pixel Code -->
 <style>
 :root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;background:#fafafa}
@@ -240,6 +263,7 @@ footer ol{margin:0;padding-left:18px;display:grid;gap:4px}
 </style>
 </head>
 <body>
+<noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=525622514314902&ev=PageView&noscript=1"></noscript>
 <nav class="nav" aria-label="Page">
   <div class="wrap">
     <b>Lucerne Grand</b>
@@ -949,6 +973,92 @@ if(typeof module!=="undefined"){module.exports={parseUnits:parseUnits};}
   cp.addEventListener("click",function(){var done=function(){cp.textContent="Copied";setTimeout(function(){cp.textContent="Copy 9090 8898";},1600);};
     var sel=function(){var r=document.createRange();r.selectNodeContents($("wa"));var s=getSelection();s.removeAllRanges();s.addRange(r);};
     try{navigator.clipboard.writeText("90908898").then(done,sel);}catch(e){sel();}});
+})();
+</script>
+<!-- Analytics event tracking: runs separately from the page script and never stops clicks or calculations -->
+<script>
+(function(){
+  try{
+    var PROJECT='lucerne_grand';
+    var lastFire={};
+    function send(name,params,dedupeKey,gapMs){
+      try{
+        var key=dedupeKey||name,now=Date.now();
+        if(lastFire[key]&&now-lastFire[key]<(gapMs||1500))return;
+        lastFire[key]=now;
+        var p={project_name:PROJECT};
+        if(params)for(var k in params){if(params[k]!==undefined&&params[k]!==null&&params[k]!=='')p[k]=params[k];}
+        if(typeof window.gtag==='function')window.gtag('event',name,p);
+        if(typeof window.fbq==='function')window.fbq('trackCustom',name,p);
+      }catch(e){}
+    }
+    function where(el){
+      try{
+        if(el.closest('.nav'))return 'nav';
+        if(el.closest('.hero'))return 'hero';
+        if(el.closest('.tt-strip'))return 'value_picks_strip';
+        if(el.closest('.take'))return 'kens_take';
+        var s=el.closest('section');return s?(s.id||s.getAttribute('aria-labelledby')||'section'):'page';
+      }catch(e){return 'page';}
+    }
+    function label(el){return (el.textContent||'').replace(/\s+/g,' ').trim().slice(0,60);}
+
+    // Clicks: WhatsApp / Ask Ken / copy number, and TikTok links (capture phase, never prevents default)
+    document.addEventListener('click',function(ev){
+      try{
+        var t=ev.target;if(!t||!t.closest)return;
+        var wa=t.closest('a[href*="wa.me"]');
+        if(wa){send('whatsapp_click',{click_type:'whatsapp_link',link_location:where(wa),link_text:label(wa)},'wa_'+where(wa));return;}
+        var cp=t.closest('#copy');
+        if(cp){send('whatsapp_click',{click_type:'copy_number',link_location:where(cp),link_text:'Copy 9090 8898'},'wa_copy');return;}
+        var tt=t.closest('a[href*="tiktok.com"]');
+        if(tt){var href=tt.getAttribute('href')||'';send('tiktok_click',{link_type:href.indexOf('/video/')>-1?'video':'profile',link_location:where(tt),link_text:label(tt),link_url:href},'tt_'+where(tt)+'_'+href);}
+      }catch(e){}
+    },true);
+
+    // Section views: fire once each, when a meaningful part of the section is on screen
+    var seen={};
+    function watch(id,eventName){
+      var el=document.getElementById(id);if(!el||!('IntersectionObserver' in window))return;
+      var io=new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if(seen[eventName]||!en.isIntersecting)return;
+          var need=Math.min(en.boundingClientRect.height,window.innerHeight)*0.4;
+          if(en.intersectionRect.height>=need){seen[eventName]=true;send(eventName,{section_id:id},eventName,0);io.disconnect();}
+        });
+      },{threshold:[0,0.1,0.2,0.3,0.4,0.5,0.75,1]});
+      io.observe(el);
+    }
+    watch('units','units_view');
+    watch('afford','affordability_view');
+
+    // Calculator use: fire when the inputs change to a new result, debounced, skipping the default on-load result
+    var price=document.getElementById('price'),rate=document.getElementById('rate'),ten=document.getElementById('tenure');
+    if(price&&rate&&ten){
+      function sig(){return [price.value,rate.value,ten.value].join('|');}
+      var lastSig=sig(),timer=null,source='manual',unitNo='';
+      function num(id){var e=document.getElementById(id);if(!e)return undefined;var n=parseFloat((e.textContent||'').replace(/[^0-9.]/g,''));return isNaN(n)?undefined:n;}
+      function check(){
+        try{
+          var s=sig();if(s===lastSig)return;lastSig=s;
+          send('affordability_complete',{
+            calc_source:source,unit_no:unitNo||undefined,
+            purchase_price:parseFloat(price.value)||0,interest_rate:parseFloat(rate.value)||0,loan_tenure:parseFloat(ten.value)||0,
+            monthly_instalment:num('o-mth'),loan_amount:num('o-loan'),value:parseFloat(price.value)||0,currency:'SGD'
+          },'calc_'+s,0);
+        }catch(e){}
+      }
+      function schedule(src,unit){source=src;unitNo=unit||'';clearTimeout(timer);timer=setTimeout(check,1500);}
+      [price,rate,ten].forEach(function(inp){inp.addEventListener('input',function(){schedule('manual');});inp.addEventListener('change',function(){schedule('manual');});});
+      document.addEventListener('click',function(ev){
+        try{
+          var t=ev.target;if(!t||!t.closest)return;
+          var seg=t.closest('.seg button');if(seg){schedule('preset_'+(seg.textContent||'').trim().toLowerCase());return;}
+          var c=t.closest('.calc-btn');if(c&&!c.classList.contains('plan-btn')){schedule('unit_list',c.getAttribute('data-u'));}
+        }catch(e){}
+      },true);
+    }
+  }catch(e){}
 })();
 </script>
 </body>
